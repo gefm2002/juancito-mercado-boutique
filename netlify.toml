@@ -8,6 +8,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  included_files = ["netlify/functions/**/*.ts"]
 
 # Redirects se manejan en public/_redirects (se copia a dist automáticamente)
 # Netlify procesa funciones automáticamente ANTES de redirects

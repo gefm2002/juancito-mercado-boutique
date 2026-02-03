@@ -61,19 +61,291 @@ app.post('/api/admin/login', async (req, res) => {
   }
 })
 
+// Helper para verificar token
+function verifyToken(authHeader: string | undefined) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null
+  }
+  const token = authHeader.substring(7)
+  try {
+    return jwt.verify(token, jwtSecret) as { id: string; email: string; role: string }
+  } catch {
+    return null
+  }
+}
+
 // Me endpoint
 app.get('/api/admin/me', async (req, res) => {
-  const authHeader = req.headers.authorization
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+  res.json({ admin: decoded })
+})
+
+// Products endpoint
+app.get('/api/admin/products', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
   }
 
-  const token = authHeader.substring(7)
   try {
-    const decoded = jwt.verify(token, jwtSecret) as { id: string; email: string; role: string }
-    res.json({ admin: decoded })
-  } catch {
-    res.status(401).json({ error: 'Token inválido' })
+    const { data, error } = await supabase
+      .from('juancito_products')
+      .select('*, category:juancito_categories(*)')
+      .order('name')
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.post('/api/admin/products', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_products')
+      .insert(req.body)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/products', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id, ...updateData } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { data, error } = await supabase
+      .from('juancito_products')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.delete('/api/admin/products', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { error } = await supabase.from('juancito_products').delete().eq('id', id)
+    if (error) throw error
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Categories endpoint
+app.get('/api/admin/categories', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_categories')
+      .select('*')
+      .order('sort_order')
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.post('/api/admin/categories', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_categories')
+      .insert(req.body)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/categories', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id, ...updateData } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { data, error } = await supabase
+      .from('juancito_categories')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.delete('/api/admin/categories', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { error } = await supabase.from('juancito_categories').delete().eq('id', id)
+    if (error) throw error
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Orders endpoint
+app.get('/api/admin/orders', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/orders', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id, status, notes_internal } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const updateData: any = {}
+    if (status) updateData.status = status
+    if (notes_internal !== undefined) updateData.notes_internal = notes_internal
+
+    const { data: order } = await supabase
+      .from('juancito_orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (order && status && status !== order.status) {
+      // Regenerar mensaje WhatsApp
+      const customer = order.customer
+      const items = order.items
+      const totals = order.totals
+      const fulfillment = order.fulfillment
+
+      let message = `Hola! Quiero hacer un pedido. Te paso el detalle 👇\n\n`
+      message += `*Pedido #${order.order_number}*\n\n`
+      message += `*Cliente:*\n`
+      message += `${customer.nombre} ${customer.apellido}\n`
+      message += `Email: ${customer.email}\n`
+      message += `Tel: ${customer.telefono}\n\n`
+      message += `*Productos:*\n`
+      items.forEach((item: any) => {
+        message += `- ${item.product.name}`
+        if (item.weight_g) message += ` (${item.weight_g}g)`
+        message += ` x${item.quantity} - $${(item.price * item.quantity).toLocaleString()}\n`
+      })
+      message += `\n*Total: $${totals.total.toLocaleString()}*\n\n`
+      message += `*Entrega:*\n`
+      if (fulfillment.type === 'retiro') {
+        message += `Retiro en: ${fulfillment.sucursal}\n`
+      } else {
+        message += `Envío a: ${fulfillment.direccion}, ${fulfillment.zona}\n`
+      }
+      message += `\n*Pago:* ${order.payment_method}\n`
+      if (order.notes_customer) {
+        message += `\n*Notas:* ${order.notes_customer}\n`
+      }
+      if (notes_internal) {
+        message += `\n*Notas internas:* ${notes_internal}\n`
+      }
+
+      updateData.whatsapp_message = message
+    }
+
+    const { data, error } = await supabase
+      .from('juancito_orders')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
   }
 })
 
@@ -239,8 +511,179 @@ app.post('/api/orders/create', async (req, res) => {
   }
 })
 
-// Nota: Otras funciones admin deben manejarse individualmente o usar netlify dev
-// Por ahora solo manejamos login y me localmente
+// Promos endpoint
+app.get('/api/admin/promos', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_promos')
+      .select('*')
+      .order('sort_order')
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.post('/api/admin/promos', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_promos')
+      .insert(req.body)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/promos', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id, ...updateData } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { data, error } = await supabase
+      .from('juancito_promos')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    res.json(data)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.delete('/api/admin/promos', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { id } = req.body
+    if (!id) {
+      return res.status(400).json({ error: 'ID requerido' })
+    }
+
+    const { error } = await supabase.from('juancito_promos').delete().eq('id', id)
+    if (error) throw error
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Sucursales endpoint
+app.get('/api/admin/sucursales', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data } = await supabase
+      .from('juancito_site_config')
+      .select('*')
+      .eq('key', 'sucursales')
+      .single()
+
+    const sucursales = data?.value || [
+      { nombre: 'Caballito La Plata', direccion: 'Av. La Plata 152, Caballito, CABA' },
+      { nombre: 'Caballito Rivadavia', direccion: 'Av. Rivadavia 4546, Caballito, CABA' },
+    ]
+
+    res.json(sucursales)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/sucursales', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    await supabase
+      .from('juancito_site_config')
+      .upsert({ key: 'sucursales', value: req.body }, { onConflict: 'key })
+
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// Content endpoint
+app.get('/api/admin/content', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('juancito_site_config')
+      .select('*')
+
+    if (error) throw error
+
+    const config: Record<string, any> = {}
+    if (data) {
+      data.forEach((item) => {
+        config[item.key] = item.value
+      })
+    }
+
+    res.json(config)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.put('/api/admin/content', async (req, res) => {
+  const decoded = verifyToken(req.headers.authorization)
+  if (!decoded) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
+
+  try {
+    for (const [key, value] of Object.entries(req.body)) {
+      await supabase
+        .from('juancito_site_config')
+        .upsert({ key, value }, { onConflict: 'key' })
+    }
+
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor de desarrollo en http://localhost:${PORT}`)

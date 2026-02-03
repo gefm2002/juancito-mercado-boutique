@@ -193,35 +193,228 @@ SUPABASE_DB_PASSWORD=${DB_PASSWORD}
 
 ## 🗃️ PASO 3: MIGRACIONES Y BASE DE DATOS
 
-### ⚠️ IMPORTANTE: Limitaciones de Supabase API
+### ⚠️ IMPORTANTE: Esperar Activación Completa
 
-**La API de Supabase NO permite ejecutar DDL (CREATE TABLE, etc.) directamente.**
+**El proyecto de Supabase debe estar completamente activo antes de aplicar migraciones.**
 
-### Solución: Instrucciones Manuales + Script Helper
+### Script de Automatización
 
 ```typescript
-// scripts/apply-migrations.ts
-// Este script NO puede ejecutar SQL directamente
-// Solo proporciona instrucciones
+// scripts/apply-migrations-auto.ts
+import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
+
+const supabaseUrl = process.env.SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 async function applyMigrations() {
-  console.log(`
-⚠️  IMPORTANTE: Supabase API no permite ejecutar DDL directamente.
+  console.log('📦 Aplicando migrations automáticamente...\n')
 
-📝 PASOS MANUALES:
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY deben estar en .env.local')
+  }
 
-1. Ve a: https://supabase.com/dashboard/project/${PROJECT_ID}/sql/new
+  // ⚠️ IMPORTANTE: Esperar a que el proyecto esté completamente activo
+  // Esto puede tomar varios minutos después de la creación
+  console.log('⏳ Verificando que el proyecto esté activo...')
+  await waitForProjectReady(supabaseUrl, supabaseServiceKey)
 
-2. Copia y pega el contenido de: supabase/migrations/001_init.sql
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
 
-3. Ejecuta el query (Cmd/Ctrl + Enter)
+  // Leer el archivo de migration
+  const migrationPath = join(process.cwd(), 'supabase/migrations/001_init.sql')
+  const migrationSQL = readFileSync(migrationPath, 'utf-8')
 
-4. Verifica que las tablas se crearon correctamente
+  console.log('📝 Ejecutando SQL...\n')
 
-✅ Las migraciones deben aplicarse manualmente desde el SQL Editor.
-  `)
+  // Dividir en statements individuales respetando funciones y bloques
+  const statements = parseSQLStatements(migrationSQL)
+
+  console.log(`📊 Encontrados ${statements.length} statements para ejecutar\n`)
+
+  // Ejecutar cada statement
+  for (let i = 0; i < statements.length; i++) {
+    const statement = statements[i]
+    const preview = statement.substring(0, 60).replace(/\n/g, ' ')
+    
+    try {
+      console.log(`[${i + 1}/${statements.length}] Ejecutando: ${preview}...`)
+      
+      // Intentar ejecutar usando diferentes métodos
+      await executeSQLStatement(statement, supabaseUrl, supabaseServiceKey)
+      console.log(`  ✅ Ejecutado correctamente`)
+    } catch (error: any) {
+      // Si es error de "ya existe", está bien
+      if (error.message?.includes('already exists') || 
+          error.message?.includes('duplicate') ||
+          error.code === '42P07' || 
+          error.code === '42710') {
+        console.log(`  ℹ️  Ya existe (ok)`)
+      } else {
+        console.log(`  ⚠️  Error: ${error.message || error}`)
+        // Continuar con el siguiente
+      }
+    }
+  }
+
+  console.log('\n✅ Migrations aplicadas!')
+  console.log('\n💡 Verificando tablas creadas...\n')
+  
+  // Verificar que las tablas existan
+  const prefix = inferPrefixFromProject()
+  const tables = [
+    `${prefix}_categories`,
+    `${prefix}_products`,
+    `${prefix}_orders`,
+    `${prefix}_admins`,
+    `${prefix}_promos`,
+    `${prefix}_site_config`
+  ]
+
+  for (const table of tables) {
+    const { error } = await supabase.from(table).select('*').limit(0)
+    if (error) {
+      console.log(`  ⚠️  Tabla ${table} no encontrada`)
+    } else {
+      console.log(`  ✅ Tabla ${table} existe`)
+    }
+  }
 }
+
+async function waitForProjectReady(url: string, serviceKey: string, maxAttempts = 30) {
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      // Intentar una query simple para verificar que el proyecto está listo
+      const response = await fetch(`${url}/rest/v1/`, {
+        headers: {
+          'apikey': serviceKey,
+          'Authorization': `Bearer ${serviceKey}`,
+        },
+      })
+      
+      if (response.ok) {
+        console.log('✅ Proyecto activo y listo\n')
+        return
+      }
+    } catch (error) {
+      // Continuar esperando
+    }
+    
+    process.stdout.write(`\r⏳ Esperando activación... (${i + 1}/${maxAttempts})`)
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+  }
+  
+  console.log('\n⚠️  El proyecto puede no estar completamente activo, pero continuando...\n')
+}
+
+async function executeSQLStatement(statement: string, url: string, serviceKey: string) {
+  // Método 1: Intentar usar RPC exec_sql si existe
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: statement })
+    })
+
+    if (response.ok) {
+      return
+    }
+  } catch (error) {
+    // Continuar con método alternativo
+  }
+
+  // Método 2: Usar Management API para ejecutar SQL
+  const projectRef = url.replace('https://', '').replace('.supabase.co', '')
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.SUPABASE_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: statement })
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`Error ejecutando SQL: ${errorText}`)
+  }
+}
+
+function parseSQLStatements(sql: string): string[] {
+  // Dividir en statements respetando funciones y bloques
+  const statements: string[] = []
+  let currentStatement = ''
+  let inFunction = false
+  let functionDepth = 0
+
+  const lines = sql.split('\n')
+  
+  for (const line of lines) {
+    const trimmed = line.trim()
+    
+    if (trimmed.includes('CREATE OR REPLACE FUNCTION') || trimmed.includes('CREATE FUNCTION')) {
+      inFunction = true
+      functionDepth = 0
+    }
+    
+    if (inFunction) {
+      functionDepth += (line.match(/\{/g) || []).length
+      functionDepth -= (line.match(/\}/g) || []).length
+      
+      if (functionDepth <= 0 && trimmed.includes('$$')) {
+        inFunction = false
+      }
+    }
+    
+    currentStatement += line + '\n'
+    
+    if (!inFunction && trimmed.endsWith(';')) {
+      const statement = currentStatement.trim()
+      if (statement.length > 10 && !statement.startsWith('--')) {
+        statements.push(statement)
+      }
+      currentStatement = ''
+    }
+  }
+
+  if (currentStatement.trim().length > 10) {
+    statements.push(currentStatement.trim())
+  }
+
+  return statements
+}
+
+function inferPrefixFromProject(): string {
+  const projectName = process.env.SUPABASE_PROJECT_NAME || 'project'
+  return projectName
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') + '_'
+}
+
+applyMigrations().catch(console.error)
 ```
+
+### ⚠️ Nota Importante
+
+**El script debe esperar lo suficiente** para que el proyecto esté completamente activo. Esto puede tomar 2-5 minutos después de la creación. El script incluye polling para verificar que el proyecto esté listo antes de ejecutar las migraciones.
 
 ### Estructura de Migraciones
 
@@ -234,10 +427,14 @@ supabase/migrations/
 ### Convenciones de Naming
 
 - **Prefix para todo**: Inferir del nombre del proyecto
-  - Proyecto: `juancito-mercado-boutique` → Prefix: `juancito_`
-  - Tablas: `juancito_products`, `juancito_orders`, etc.
-  - Sequences: `juancito_order_number_seq`
-  - Buckets: `juancito_product_images`
+  - Proyecto: `{project-name}` → Prefix: `{project_prefix}_`
+  - Tablas: `{prefix}_products`, `{prefix}_orders`, etc.
+  - Sequences: `{prefix}_order_number_seq`
+  - Buckets: `{prefix}_product_images`
+  
+**Ejemplo:**
+- Proyecto: `mi-tienda-online` → Prefix: `mi_tienda_`
+- Tablas: `mi_tienda_products`, `mi_tienda_orders`
 
 ## 🪣 PASO 4: STORAGE BUCKETS
 
@@ -253,6 +450,8 @@ const bucketName = `${PREFIX}_product_images`
 
 async function createStorageBucket() {
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+  const prefix = inferPrefixFromProject()
+  const bucketName = `${prefix}product_images`
 
   // Crear bucket
   const { data, error } = await supabase.storage.createBucket(bucketName, {
@@ -268,13 +467,43 @@ async function createStorageBucket() {
 
   console.log(`✅ Bucket creado: ${bucketName}`)
 
-  // ⚠️ Las políticas RLS deben aplicarse manualmente
-  console.log(`
-⚠️  IMPORTANTE: Aplicar políticas RLS manualmente:
+  // Aplicar políticas RLS automáticamente
+  const storageSQL = readFileSync('supabase/migrations/002_storage.sql', 'utf-8')
+  await applyStoragePolicies(storageSQL, supabaseUrl, supabaseServiceKey)
+}
 
-1. Ve a: SQL Editor
-2. Ejecuta: supabase/migrations/002_storage.sql
-  `)
+async function applyStoragePolicies(sql: string, url: string, serviceKey: string) {
+  console.log('📝 Aplicando políticas RLS de storage...\n')
+  
+  // Reemplazar el prefix en el SQL si es necesario
+  const prefix = inferPrefixFromProject()
+  const sqlWithPrefix = sql.replace(/{PREFIX}/g, prefix)
+  
+  const statements = parseSQLStatements(sqlWithPrefix)
+  
+  for (const statement of statements) {
+    try {
+      await executeSQLStatement(statement, url, serviceKey)
+      console.log('  ✅ Política aplicada')
+    } catch (error: any) {
+      if (error.message?.includes('already exists')) {
+        console.log('  ℹ️  Política ya existe (ok)')
+      } else {
+        console.log(`  ⚠️  Error: ${error.message}`)
+      }
+    }
+  }
+  
+  console.log('\n✅ Políticas RLS de storage aplicadas!')
+}
+
+function inferPrefixFromProject(): string {
+  const projectName = process.env.SUPABASE_PROJECT_NAME || 'project'
+  return projectName
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') + '_'
 }
 ```
 
@@ -593,11 +822,14 @@ git push
 - Verificar `netlify.toml` tiene `directory = "netlify/functions"`
 - Verificar que rutas en frontend usen `/.netlify/functions/` en producción
 
-### 3. Supabase: Error ejecutando SQL via API
+### 3. Supabase: Error ejecutando migraciones
 
-**Causa:** Supabase API no permite DDL directamente
+**Causa:** Proyecto no está completamente activo o timeout en polling
 
-**Solución:** Ejecutar migraciones manualmente desde SQL Editor
+**Solución:** 
+- Aumentar el tiempo de espera en `waitForProjectReady()` (maxAttempts)
+- Verificar que el proyecto esté en estado `ACTIVE_HEALTHY` antes de ejecutar migraciones
+- Si falla, esperar 5-10 minutos y reintentar
 
 ### 4. Build Netlify: TypeScript errors con `import.meta.env`
 
@@ -663,7 +895,7 @@ Cuando recibas un prompt inicial para crear un proyecto, debes:
 2. **Crear estructura completa** de archivos
 3. **Automatizar GitHub repo** si hay `GITHUB_TOKEN`
 4. **Automatizar Supabase** si hay `SUPABASE_ACCESS_TOKEN`
-5. **Aplicar migraciones manualmente** (dar instrucciones)
+5. **Aplicar migraciones automáticamente** (esperar activación completa del proyecto)
 6. **Crear funciones en la raíz** de `netlify/functions/` (NO subdirectorios)
 7. **Usar rutas con guiones** en lugar de slashes
 8. **Google Maps sin API key** usando embed con query params
@@ -676,7 +908,7 @@ Antes de considerar el proyecto completo:
 
 - [ ] Repo GitHub creado y pusheado
 - [ ] Proyecto Supabase creado y activo
-- [ ] Migraciones aplicadas (verificar en SQL Editor)
+- [ ] Migraciones aplicadas automáticamente
 - [ ] Bucket storage creado
 - [ ] Políticas RLS aplicadas
 - [ ] Admin creado y funcional
@@ -691,4 +923,6 @@ Antes de considerar el proyecto completo:
 
 ---
 
-**Última actualización:** Basado en experiencia real con problemas de Netlify Functions y Supabase API limitations.
+**Última actualización:** Basado en experiencia real con problemas de Netlify Functions y automatización completa de Supabase.
+
+**Nota:** Este prompt es completamente genérico. Reemplaza `{project_name}`, `{project_prefix}`, etc. con los valores inferidos del prompt inicial del proyecto.

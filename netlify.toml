@@ -5,11 +5,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Redirect SPA - debe ir DESPUÉS de las funciones para no capturarlas
+# Netlify procesa los redirects en orden, así que las funciones se manejan primero
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"

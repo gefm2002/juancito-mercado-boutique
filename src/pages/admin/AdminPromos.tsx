@@ -3,8 +3,6 @@ import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Promo } from '../../types'
 
-function AdminPromos() {
-
 export default function AdminPromos() {
   const { token } = useAdmin()
   const [promos, setPromos] = useState<Promo[]>([])

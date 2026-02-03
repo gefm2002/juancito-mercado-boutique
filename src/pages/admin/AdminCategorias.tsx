@@ -3,8 +3,6 @@ import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Category } from '../../types'
 
-function AdminCategorias() {
-
 export default function AdminCategorias() {
   const { token } = useAdmin()
   const [categories, setCategories] = useState<Category[]>([])

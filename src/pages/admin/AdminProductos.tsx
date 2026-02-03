@@ -3,8 +3,6 @@ import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Product, Category } from '../../types'
 
-function AdminProductos() {
-
 export default function AdminProductos() {
   const { token } = useAdmin()
   const [products, setProducts] = useState<Product[]>([])

@@ -1,29 +1,24 @@
 # 🛠️ Setup de Desarrollo
 
-## Problema: Netlify Functions en Desarrollo Local
+## ⚠️ Importante: Servidor de Desarrollo
 
-Las Netlify Functions no están disponibles automáticamente en desarrollo local. Necesitas ejecutar `netlify dev` para que funcionen.
+Para que el login y las funciones admin funcionen en desarrollo local, necesitas ejecutar el servidor de desarrollo.
 
-## Solución Rápida
+## 🚀 Inicio Rápido
 
-### Opción 1: Usar Netlify Dev (Recomendado)
+### Opción 1: Dos Terminales (Recomendado)
 
+**Terminal 1:**
 ```bash
-# Instalar Netlify CLI globalmente
-npm install -g netlify-cli
+npm run dev:server
+```
 
-# En una terminal, ejecutar:
-netlify dev
-
-# En otra terminal, ejecutar:
+**Terminal 2:**
+```bash
 npm run dev
 ```
 
-Esto iniciará:
-- Netlify Functions en `http://localhost:8888`
-- Vite dev server en `http://localhost:5173` (con proxy a funciones)
-
-### Opción 2: Script Automático
+### Opción 2: Una Terminal (Automático)
 
 ```bash
 npm run dev:full
@@ -31,14 +26,34 @@ npm run dev:full
 
 Esto ejecuta ambos servidores simultáneamente.
 
-## Verificar que Funciona
+## 📝 Qué hace cada servidor
 
-1. Abre `http://localhost:5173`
-2. Ve a `/admin`
-3. Intenta loguearte con: `admin@juancito.com` / `admin123`
+- **Vite Dev Server** (`npm run dev`): Frontend en http://localhost:5173
+- **Dev Server** (`npm run dev:server`): API local en http://localhost:3001
+  - Proporciona `/api/admin/login` y otras funciones
+  - Usa las credenciales de `.env.local`
 
-Si ves el error "Unexpected end of JSON input", significa que las funciones no están corriendo.
+## ✅ Verificar que funciona
 
-## Solución Temporal
+1. Ejecuta `npm run dev:full` o los dos servidores por separado
+2. Abre http://localhost:5173
+3. Ve a `/admin`
+4. Login con: `admin@juancito.com` / `admin123`
 
-Si no puedes instalar Netlify CLI, puedes modificar el código para usar Supabase directamente en desarrollo (sin funciones). Pero esto no es recomendado para producción.
+## 🔧 Troubleshooting
+
+### Error: "Unexpected end of JSON input"
+- El servidor de desarrollo no está corriendo
+- Ejecuta: `npm run dev:server` en otra terminal
+
+### Error: "No se puede conectar al servidor"
+- Verifica que el servidor esté en puerto 3001
+- Verifica que `.env.local` tenga las credenciales correctas
+
+### Error: "Credenciales inválidas"
+- Verifica que el admin exista: `npm run create-admin`
+- O usa: `admin@juancito.com` / `admin123` (creado en seed)
+
+## 📦 Producción
+
+En producción (Netlify), las funciones se ejecutan automáticamente. No necesitas el servidor de desarrollo.

@@ -35,12 +35,13 @@ export default function Sucursales() {
                 <p className="text-muted mb-4">Tel: {sucursal.telefono}</p>
               )}
               <iframe
-                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6d-s6Y4uo4qJ2A&q=${encodeURIComponent(sucursal.direccion)}`}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(sucursal.direccion)}&hl=es&z=14&output=embed`}
                 width="100%"
                 height="300"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
                 className="rounded"
               />
             </div>

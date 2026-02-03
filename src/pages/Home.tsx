@@ -179,12 +179,13 @@ export default function Home() {
                   <h3 className="text-xl font-semibold mb-2">{sucursal.nombre}</h3>
                   <p className="text-muted mb-4">{sucursal.direccion}</p>
                   <iframe
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6d-s6Y4uo4qJ2A&q=${encodeURIComponent(sucursal.direccion)}`}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(sucursal.direccion)}&hl=es&z=14&output=embed`}
                     width="100%"
                     height="200"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
                     className="rounded mb-4"
                   />
                   <Link to="/sucursales" className="btn-primary">

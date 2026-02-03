@@ -1,0 +1,11 @@
+# Netlify redirects file
+# Las funciones se procesan automáticamente antes de estos redirects
+
+/admin/*    /index.html   200
+/catalogo   /index.html   200
+/producto/* /index.html   200
+/carrito    /index.html   200
+/checkout   /index.html   200
+/sucursales /index.html   200
+/faq        /index.html   200
+/*          /index.html   200

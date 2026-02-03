@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { SiteConfig } from '../types'
+import { apiUrl } from '../lib/api-helper'
 
 export default function Sucursales() {
   const [config, setConfig] = useState<SiteConfig | null>(null)
@@ -10,7 +11,7 @@ export default function Sucursales() {
 
   async function loadConfig() {
     try {
-      const res = await fetch('/api/public/config')
+      const res = await fetch(apiUrl('public/config'))
       const data = await res.json()
       setConfig(data)
     } catch (error) {

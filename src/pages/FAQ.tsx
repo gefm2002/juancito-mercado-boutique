@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiUrl } from '../lib/api-helper'
 
 interface FAQ {
   question: string
@@ -14,7 +15,7 @@ export default function FAQ() {
 
   async function loadFAQs() {
     try {
-      const res = await fetch('/api/public/config')
+      const res = await fetch(apiUrl('public/config'))
       const data = await res.json()
       if (data.faqs) setFaqs(data.faqs)
     } catch (error) {

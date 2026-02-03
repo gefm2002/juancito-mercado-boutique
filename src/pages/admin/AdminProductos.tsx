@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Product, Category } from '../../types'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminProductos() {
   const { token } = useAdmin()
@@ -19,7 +20,7 @@ export default function AdminProductos() {
 
   async function loadProducts() {
     try {
-      const res = await fetch('/api/admin/products', {
+      const res = await fetch(apiUrl('admin/products'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -33,7 +34,7 @@ export default function AdminProductos() {
 
   async function loadCategories() {
     try {
-      const res = await fetch('/api/admin/categories', {
+      const res = await fetch(apiUrl('admin/categories'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -45,7 +46,7 @@ export default function AdminProductos() {
 
   async function handleSave(product: Partial<Product>) {
     try {
-      const url = editing?.id ? '/api/admin/products' : '/api/admin/products'
+      const url = apiUrl('admin/products')
       const method = editing?.id ? 'PUT' : 'POST'
 
       await fetch(url, {
@@ -68,7 +69,7 @@ export default function AdminProductos() {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return
 
     try {
-      await fetch('/api/admin/products', {
+      await fetch(apiUrl('admin/products'), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

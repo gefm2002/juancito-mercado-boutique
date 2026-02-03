@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Promo } from '../../types'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminPromos() {
   const { token } = useAdmin()
@@ -14,7 +15,7 @@ export default function AdminPromos() {
 
   async function loadPromos() {
     try {
-      const res = await fetch('/api/admin/promos', {
+      const res = await fetch(apiUrl('admin/promos'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -26,7 +27,7 @@ export default function AdminPromos() {
 
   async function handleSave(promo: Partial<Promo>) {
     try {
-      const url = '/api/admin/promos'
+      const url = apiUrl('admin/promos')
       const method = editing?.id ? 'PUT' : 'POST'
 
       await fetch(url, {
@@ -49,7 +50,7 @@ export default function AdminPromos() {
     if (!confirm('¿Estás seguro de eliminar esta promo?')) return
 
     try {
-      await fetch('/api/admin/promos', {
+      await fetch(apiUrl('admin/promos'), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

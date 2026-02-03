@@ -238,7 +238,7 @@ async function seed() {
     },
     {
       key: 'whatsapp_phone',
-      value: null,
+      value: '5491141744221',
     },
     {
       key: 'whatsapp_fallback_url',

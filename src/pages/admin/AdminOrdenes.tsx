@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Order } from '../../types'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminOrdenes() {
   const { token } = useAdmin()
@@ -13,7 +14,7 @@ export default function AdminOrdenes() {
 
   async function loadOrders() {
     try {
-      const res = await fetch('/api/admin/orders', {
+      const res = await fetch(apiUrl('admin/orders'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -25,7 +26,7 @@ export default function AdminOrdenes() {
 
   async function handleStatusChange(orderId: string, status: string) {
     try {
-      await fetch('/api/admin/orders', {
+      await fetch(apiUrl('admin/orders'), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -41,7 +42,7 @@ export default function AdminOrdenes() {
   }
 
   function openWhatsApp(message: string) {
-    const configRes = fetch('/api/public/config').then((r) => r.json())
+    const configRes = fetch(apiUrl('public/config')).then((r) => r.json())
     configRes.then((config) => {
       if (config.whatsapp_phone) {
         window.open(`https://wa.me/${config.whatsapp_phone}?text=${encodeURIComponent(message)}`, '_blank')

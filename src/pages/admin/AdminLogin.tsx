@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdmin } from '../../contexts/AdminContext'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch(apiUrl('admin/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

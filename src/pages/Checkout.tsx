@@ -27,7 +27,8 @@ export default function Checkout() {
 
   async function loadConfig() {
     try {
-      const res = await fetch('/api/public/config')
+      const apiBase = import.meta.env.DEV ? '/api' : '/.netlify/functions'
+      const res = await fetch(`${apiBase}/public/config`)
       const data = await res.json()
       setConfig(data)
       if (data.sucursales.length > 0) {
@@ -43,7 +44,8 @@ export default function Checkout() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/orders/create', {
+      const apiBase = import.meta.env.DEV ? '/api' : '/.netlify/functions'
+      const res = await fetch(`${apiBase}/orders/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

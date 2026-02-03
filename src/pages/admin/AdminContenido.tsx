@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminContenido() {
   const { token } = useAdmin()
@@ -12,7 +13,7 @@ export default function AdminContenido() {
 
   async function loadConfig() {
     try {
-      const res = await fetch('/api/admin/content', {
+      const res = await fetch(apiUrl('admin/content'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -24,7 +25,7 @@ export default function AdminContenido() {
 
   async function handleSave() {
     try {
-      await fetch('/api/admin/content', {
+      await fetch(apiUrl('admin/content'), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

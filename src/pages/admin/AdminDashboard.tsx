@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminDashboard() {
   const { token } = useAdmin()
@@ -18,13 +19,13 @@ export default function AdminDashboard() {
   async function loadStats() {
     try {
       const [productsRes, ordersRes, categoriesRes] = await Promise.all([
-        fetch('/api/admin/products', {
+        fetch(apiUrl('admin/products'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('/api/admin/orders', {
+        fetch(apiUrl('admin/orders'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('/api/admin/categories', {
+        fetch(apiUrl('admin/categories'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])

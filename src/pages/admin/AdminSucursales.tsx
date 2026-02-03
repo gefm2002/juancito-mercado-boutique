@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Sucursal } from '../../types'
+import { apiUrl } from '../../lib/api-helper'
 
 export default function AdminSucursales() {
   const { token } = useAdmin()
@@ -13,7 +14,7 @@ export default function AdminSucursales() {
 
   async function loadSucursales() {
     try {
-      const res = await fetch('/api/admin/sucursales', {
+      const res = await fetch(apiUrl('admin/sucursales'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -25,7 +26,7 @@ export default function AdminSucursales() {
 
   async function handleSave(sucursales: Sucursal[]) {
     try {
-      await fetch('/api/admin/sucursales', {
+      await fetch(apiUrl('admin/sucursales'), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

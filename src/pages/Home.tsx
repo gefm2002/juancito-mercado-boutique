@@ -15,8 +15,9 @@ export default function Home() {
 
   async function loadData() {
     try {
+      const apiBase = import.meta.env.DEV ? '/api' : '/.netlify/functions'
       const [configRes, promosRes, categoriesRes] = await Promise.all([
-        fetch('/api/public/config').then((r) => r.json()),
+        fetch(`${apiBase}/public/config`).then((r) => r.json()),
         supabase.from('juancito_promos').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('juancito_categories').select('*').eq('is_active', true).order('sort_order').limit(6),
       ])

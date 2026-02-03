@@ -15,7 +15,7 @@ export default function AdminCategorias() {
 
   async function loadCategories() {
     try {
-      const res = await fetch(apiUrl('admin/categories'), {
+      const res = await fetch(apiUrl('admin-categories'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -27,7 +27,7 @@ export default function AdminCategorias() {
 
   async function handleSave(category: Partial<Category>) {
     try {
-      const url = apiUrl('admin/categories')
+      const url = apiUrl('admin-categories')
       const method = editing?.id ? 'PUT' : 'POST'
 
       await fetch(url, {
@@ -50,7 +50,7 @@ export default function AdminCategorias() {
     if (!confirm('¿Estás seguro de eliminar esta categoría?')) return
 
     try {
-      await fetch(apiUrl('admin/categories'), {
+      await fetch(apiUrl('admin-categories'), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

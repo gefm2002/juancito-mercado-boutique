@@ -11,7 +11,7 @@ export default function Sucursales() {
 
   async function loadConfig() {
     try {
-      const res = await fetch(apiUrl('public/config'))
+      const res = await fetch(apiUrl('public-config'))
       const data = await res.json()
       setConfig(data)
     } catch (error) {

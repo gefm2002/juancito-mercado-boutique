@@ -19,13 +19,13 @@ export default function AdminDashboard() {
   async function loadStats() {
     try {
       const [productsRes, ordersRes, categoriesRes] = await Promise.all([
-        fetch(apiUrl('admin/products'), {
+        fetch(apiUrl('admin-products'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(apiUrl('admin/orders'), {
+        fetch(apiUrl('admin-orders'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(apiUrl('admin/categories'), {
+        fetch(apiUrl('admin-categories'), {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])

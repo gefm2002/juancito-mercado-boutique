@@ -15,7 +15,7 @@ export default function AdminPromos() {
 
   async function loadPromos() {
     try {
-      const res = await fetch(apiUrl('admin/promos'), {
+      const res = await fetch(apiUrl('admin-promos'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -27,7 +27,7 @@ export default function AdminPromos() {
 
   async function handleSave(promo: Partial<Promo>) {
     try {
-      const url = apiUrl('admin/promos')
+      const url = apiUrl('admin-promos')
       const method = editing?.id ? 'PUT' : 'POST'
 
       await fetch(url, {
@@ -50,7 +50,7 @@ export default function AdminPromos() {
     if (!confirm('¿Estás seguro de eliminar esta promo?')) return
 
     try {
-      await fetch(apiUrl('admin/promos'), {
+      await fetch(apiUrl('admin-promos'), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

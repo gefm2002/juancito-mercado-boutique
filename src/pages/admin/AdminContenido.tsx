@@ -13,7 +13,7 @@ export default function AdminContenido() {
 
   async function loadConfig() {
     try {
-      const res = await fetch(apiUrl('admin/content'), {
+      const res = await fetch(apiUrl('admin-content'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -25,7 +25,7 @@ export default function AdminContenido() {
 
   async function handleSave() {
     try {
-      await fetch(apiUrl('admin/content'), {
+      await fetch(apiUrl('admin-content'), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

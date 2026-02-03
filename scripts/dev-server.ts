@@ -25,7 +25,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Login endpoint
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin-login', async (req, res) => {
   try {
     const { email, password } = req.body
 
@@ -75,7 +75,7 @@ function verifyToken(authHeader: string | undefined) {
 }
 
 // Me endpoint
-app.get('/api/admin/me', async (req, res) => {
+app.get('/api/admin-me', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -350,7 +350,7 @@ app.put('/api/admin/orders', async (req, res) => {
 })
 
 // Public config endpoint
-app.get('/api/public/config', async (req, res) => {
+app.get('/api/public-config', async (req, res) => {
   try {
     const [configRes, promosRes, sucursalesRes] = await Promise.all([
       supabase.from('juancito_site_config').select('*'),
@@ -405,7 +405,7 @@ app.get('/api/public/config', async (req, res) => {
 })
 
 // Public catalog endpoint
-app.get('/api/public/catalog', async (req, res) => {
+app.get('/api/public-catalog', async (req, res) => {
   try {
     const supabaseAnon = createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY!)
     const { data: products, error } = await supabaseAnon
@@ -423,7 +423,7 @@ app.get('/api/public/catalog', async (req, res) => {
 })
 
 // Orders create endpoint
-app.post('/api/orders/create', async (req, res) => {
+app.post('/api/orders-create', async (req, res) => {
   try {
     const body = req.body
     const { items, customer, fulfillment, payment_method, notes_customer } = body

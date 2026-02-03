@@ -20,7 +20,7 @@ export default function AdminProductos() {
 
   async function loadProducts() {
     try {
-      const res = await fetch(apiUrl('admin/products'), {
+      const res = await fetch(apiUrl('admin-products'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -34,7 +34,7 @@ export default function AdminProductos() {
 
   async function loadCategories() {
     try {
-      const res = await fetch(apiUrl('admin/categories'), {
+      const res = await fetch(apiUrl('admin-categories'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -46,7 +46,7 @@ export default function AdminProductos() {
 
   async function handleSave(product: Partial<Product>) {
     try {
-      const url = apiUrl('admin/products')
+      const url = apiUrl('admin-products')
       const method = editing?.id ? 'PUT' : 'POST'
 
       await fetch(url, {
@@ -69,7 +69,7 @@ export default function AdminProductos() {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return
 
     try {
-      await fetch(apiUrl('admin/products'), {
+      await fetch(apiUrl('admin-products'), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

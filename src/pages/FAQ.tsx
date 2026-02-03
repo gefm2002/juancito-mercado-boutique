@@ -15,7 +15,7 @@ export default function FAQ() {
 
   async function loadFAQs() {
     try {
-      const res = await fetch(apiUrl('public/config'))
+      const res = await fetch(apiUrl('public-config'))
       const data = await res.json()
       if (data.faqs) setFaqs(data.faqs)
     } catch (error) {

@@ -45,7 +45,7 @@ export default function Checkout() {
 
     try {
       const apiBase = import.meta.env.DEV ? '/api' : '/.netlify/functions'
-      const res = await fetch(`${apiBase}/orders/create`, {
+      const res = await fetch(`${apiBase}/orders-create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

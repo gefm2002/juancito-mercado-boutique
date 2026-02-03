@@ -14,7 +14,7 @@ export default function AdminSucursales() {
 
   async function loadSucursales() {
     try {
-      const res = await fetch(apiUrl('admin/sucursales'), {
+      const res = await fetch(apiUrl('admin-sucursales'), {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await res.json()
@@ -26,7 +26,7 @@ export default function AdminSucursales() {
 
   async function handleSave(sucursales: Sucursal[]) {
     try {
-      await fetch(apiUrl('admin/sucursales'), {
+      await fetch(apiUrl('admin-sucursales'), {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,

@@ -3,8 +3,6 @@ import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Order } from '../../types'
 
-function AdminOrdenes() {
-
 export default function AdminOrdenes() {
   const { token } = useAdmin()
   const [orders, setOrders] = useState<Order[]>([])

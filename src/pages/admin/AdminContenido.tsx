@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 
-function AdminContenido() {
-
 export default function AdminContenido() {
   const { token } = useAdmin()
   const [config, setConfig] = useState<any>({})

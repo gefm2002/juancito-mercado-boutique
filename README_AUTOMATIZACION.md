@@ -1,18 +1,23 @@
-# 🚀 Prompt de Automatización Completa - GitHub + Supabase
+# 🚀 Prompt de Automatización Completa - Genérico
 
 ## 📋 Resumen
 
-Este documento contiene el **prompt mejorado** que debe usarse para automatizar completamente la creación de repositorios en GitHub y la configuración de Supabase, **sin dejar pasos manuales al usuario**.
+Este documento contiene el **prompt genérico mejorado** que debe agregarse al final del prompt inicial de cualquier proyecto. Automatiza completamente GitHub y Supabase **inferiendo todo del prompt inicial**, sin hardcodear valores específicos.
 
-## 🎯 Prompt para Cursor/Claude (Copiar y Pegar)
+## 🎯 Prompt Genérico para Agregar al Final del Prompt Inicial
 
 ```
-OBJETIVO: Automatizar 100% la configuración inicial del proyecto
+═══════════════════════════════════════════════════════════════
+AUTOMATIZACIÓN COMPLETA - GITHUB + SUPABASE (GENÉRICO)
+═══════════════════════════════════════════════════════════════
 
-CREDENCIALES PROPORCIONADAS:
-- GITHUB_TOKEN: [token]
-- SUPABASE_ACCESS_TOKEN: [token]  
-- SUPABASE_ORG_SLUG: [slug]
+Este bloque debe agregarse al final del prompt inicial del proyecto.
+TODOS los valores deben INFERIRSE del prompt inicial, NO hardcodear.
+
+CREDENCIALES PROPORCIONADAS (si están disponibles):
+- GITHUB_TOKEN: [token proporcionado]
+- SUPABASE_ACCESS_TOKEN: [token proporcionado]
+- SUPABASE_ORG_SLUG: [slug proporcionado] (opcional)
 
 ═══════════════════════════════════════════════════════════════
 AUTOMATIZACIÓN OBLIGATORIA (NO DEJAR PASOS MANUALES)

@@ -9,8 +9,43 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# Redirect SPA - debe ir DESPUÉS de las funciones para no capturarlas
-# Netlify procesa los redirects en orden, así que las funciones se manejan primero
+# Redirect SPA - Netlify procesa funciones antes de redirects automáticamente
+# Pero para estar seguros, usamos un redirect más específico
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/catalogo"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/producto/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/carrito"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/checkout"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/sucursales"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

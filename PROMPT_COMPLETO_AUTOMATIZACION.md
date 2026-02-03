@@ -524,12 +524,22 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@proyecto.com'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
 
+function inferPrefixFromProject(): string {
+  const projectName = process.env.SUPABASE_PROJECT_NAME || 'project'
+  return projectName
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') + '_'
+}
+
 async function createAdmin() {
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10)
+  const prefix = inferPrefixFromProject()
 
   const { data, error } = await supabase
-    .from(`${PREFIX}_admins`)
+    .from(`${prefix}admins`)
     .insert({
       email: ADMIN_EMAIL,
       password_hash: passwordHash,
@@ -555,6 +565,15 @@ import fetch from 'node-fetch'
 import sharp from 'sharp'
 import { createClient } from '@supabase/supabase-js'
 import * as fs from 'fs'
+
+function inferPrefixFromProject(): string {
+  const projectName = process.env.SUPABASE_PROJECT_NAME || 'project'
+  return projectName
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') + '_'
+}
 
 async function downloadAndUploadImages() {
   const supabase = createClient(
@@ -583,8 +602,11 @@ async function downloadAndUploadImages() {
     const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.webp`
     const path = `${img.productId}/${filename}`
 
+    const prefix = inferPrefixFromProject()
+    const bucketName = `${prefix}product_images`
+    
     const { data, error } = await supabase.storage
-      .from(`${PREFIX}_product_images`)
+      .from(bucketName)
       .upload(path, optimized, {
         contentType: 'image/webp',
         upsert: false,
@@ -597,12 +619,12 @@ async function downloadAndUploadImages() {
 
     // 4. Obtener URL pública
     const { data: publicUrl } = supabase.storage
-      .from(`${PREFIX}_product_images`)
+      .from(bucketName)
       .getPublicUrl(path)
 
     // 5. Actualizar producto con URL
     await supabase
-      .from(`${PREFIX}_products`)
+      .from(`${prefix}products`)
       .update({
         images: [publicUrl.publicUrl],
       })

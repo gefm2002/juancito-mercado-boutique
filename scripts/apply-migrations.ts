@@ -19,63 +19,63 @@ async function applyMigrations() {
 
   // Leer el archivo de migration
   const migrationPath = join(process.cwd(), 'supabase/migrations/001_init.sql')
-  const migrationSQL = readFileSync(migrationPath, 'utf-8')
+  let migrationSQL = readFileSync(migrationPath, 'utf-8')
 
-  console.log('📝 Ejecutando SQL...')
-
-  // Dividir en statements individuales
+  // Limpiar comentarios y dividir en statements
   const statements = migrationSQL
     .split(';')
     .map(s => s.trim())
-    .filter(s => s.length > 0 && !s.startsWith('--'))
+    .filter(s => {
+      const trimmed = s.trim()
+      return trimmed.length > 10 && 
+             !trimmed.startsWith('--') && 
+             !trimmed.toLowerCase().startsWith('comment')
+    })
 
-  for (const statement of statements) {
-    if (statement.length < 10) continue // Skip very short statements
-    
+  console.log(`📝 Ejecutando ${statements.length} statements...\n`)
+
+  for (let i = 0; i < statements.length; i++) {
+    const statement = statements[i]
+    if (!statement) continue
+
     try {
-      // Ejecutar cada statement
-      const { error } = await supabase.rpc('exec_sql', { sql: statement })
+      // Para CREATE TABLE y otros DDL, necesitamos usar el método correcto
+      // Supabase no permite ejecutar DDL directamente desde el cliente JS
+      // Necesitamos usar el SQL Editor o la API de Management
       
-      // Si exec_sql no existe, intentar ejecutar directamente
-      if (error && error.message?.includes('exec_sql')) {
-        // Usar query directa para statements simples
-        if (statement.toLowerCase().includes('create table')) {
-          console.log(`⚠️  Ejecutando manualmente: ${statement.substring(0, 50)}...`)
+      // Por ahora, solo verificamos que las tablas existan
+      const tableMatch = statement.match(/CREATE TABLE IF NOT EXISTS (\w+)/i)
+      if (tableMatch) {
+        const tableName = tableMatch[1]
+        console.log(`✓ Verificando tabla: ${tableName}`)
+        
+        // Verificar si la tabla existe
+        const { error } = await supabase.from(tableName).select('*').limit(0)
+        if (error && error.code === '42P01') {
+          console.log(`  ⚠️  Tabla ${tableName} no existe - debe ejecutarse manualmente`)
+        } else {
+          console.log(`  ✅ Tabla ${tableName} existe`)
         }
       }
     } catch (err) {
-      // Ignorar errores de "ya existe"
-      if (err instanceof Error && err.message.includes('already exists')) {
-        console.log(`ℹ️  Ya existe: ${statement.substring(0, 50)}...`)
-      } else {
-        console.error(`Error en statement: ${err}`)
-      }
+      // Continuar con el siguiente
     }
   }
 
-  console.log('\n✅ Migrations aplicadas!')
-  console.log('💡 Si hay errores, ejecuta el SQL manualmente desde el SQL Editor de Supabase')
-}
-
-// Alternativa: usar fetch directo a la API REST
-async function applyMigrationsViaAPI() {
-  console.log('📦 Aplicando migrations vía API...\n')
-
-  const migrationPath = join(process.cwd(), 'supabase/migrations/001_init.sql')
-  const migrationSQL = readFileSync(migrationPath, 'utf-8')
-
-  // Supabase no tiene una API REST directa para ejecutar SQL arbitrario
-  // Necesitamos usar el SQL Editor o el cliente de Supabase
-  console.log('⚠️  La API de Supabase no permite ejecutar SQL arbitrario.')
-  console.log('📝 Por favor, ejecuta el SQL manualmente:')
+  console.log('\n⚠️  IMPORTANTE: Las migrations DDL deben ejecutarse manualmente.')
+  console.log('📝 Pasos:')
   console.log('   1. Ve a https://supabase.com/dashboard')
-  console.log('   2. Selecciona tu proyecto')
-  console.log('   3. Ve a SQL Editor')
-  console.log('   4. Copia y pega el contenido de supabase/migrations/001_init.sql')
-  console.log('   5. Ejecuta el query\n')
+  console.log('   2. Selecciona tu proyecto: juancito-mercado-boutique')
+  console.log('   3. Ve a SQL Editor (menú lateral)')
+  console.log('   4. Copia y pega el contenido de: supabase/migrations/001_init.sql')
+  console.log('   5. Haz clic en "Run" o presiona Cmd/Ctrl + Enter')
+  console.log('   6. Verifica que no haya errores\n')
   
-  console.log('O usa Supabase CLI:')
+  console.log('💡 Alternativa: Instala Supabase CLI y ejecuta:')
+  console.log('   npm install -g supabase')
+  console.log('   supabase login')
+  console.log('   supabase link --project-ref oseeysmiwfdhpizzeota')
   console.log('   supabase db push\n')
 }
 
-applyMigrationsViaAPI().catch(console.error)
+applyMigrations().catch(console.error)

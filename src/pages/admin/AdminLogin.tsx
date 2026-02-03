@@ -1,10 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdmin } from '../../contexts/AdminContext'
-import { supabase } from '../../lib/supabase'
-import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = import.meta.env.VITE_JWT_SECRET || 'change-me-in-production'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -20,60 +16,47 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      // En desarrollo, usar Supabase directamente
-      // En producción, usar Netlify Functions
-      if (import.meta.env.DEV) {
-        // Login directo con Supabase (solo en desarrollo)
-        const { data: admin, error: supabaseError } = await supabase
-          .from('juancito_admins')
-          .select('*')
-          .eq('email', email.toLowerCase())
-          .eq('is_active', true)
-          .single()
-
-        if (supabaseError || !admin) {
-          throw new Error('Credenciales inválidas')
-        }
-
-        // Verificar password (necesitamos bcrypt en el cliente, mejor usar función)
-        // Por ahora, usar función pero con mejor manejo de errores
-        const res = await fetch('/api/admin/login', {
+      // Intentar con /api (proxy de Vite a netlify dev)
+      let res
+      try {
+        res = await fetch('/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
         })
-
-        if (!res.ok) {
-          const errorText = await res.text()
-          let errorData
-          try {
-            errorData = JSON.parse(errorText)
-          } catch {
-            throw new Error('No se puede conectar a las funciones. Ejecuta: npm install -g netlify-cli && netlify dev')
-          }
-          throw new Error(errorData.error || 'Error al iniciar sesión')
-        }
-
-        const data = await res.json()
-        login(data.token)
-        navigate('/admin/dashboard')
-      } else {
-        // En producción, usar función normalmente
-        const res = await fetch('/.netlify/functions/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-
-        if (!res.ok) {
-          const errorData = await res.json()
-          throw new Error(errorData.error || 'Error al iniciar sesión')
-        }
-
-        const data = await res.json()
-        login(data.token)
-        navigate('/admin/dashboard')
+      } catch (fetchError) {
+        throw new Error('No se puede conectar a las funciones. Ejecuta: netlify dev (en otra terminal)')
       }
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          throw new Error(`Error del servidor: ${errorText.substring(0, 100)}`)
+        }
+        throw new Error(errorData.error || `Error ${res.status}`)
+      }
+
+      const text = await res.text()
+      if (!text) {
+        throw new Error('Respuesta vacía del servidor. Verifica que netlify dev esté corriendo.')
+      }
+
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(`Respuesta no es JSON válido. Verifica que netlify dev esté corriendo en puerto 8888.`)
+      }
+
+      if (!data.token) {
+        throw new Error('No se recibió token de autenticación')
+      }
+
+      login(data.token)
+      navigate('/admin/dashboard')
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión')
     } finally {
@@ -87,7 +70,15 @@ export default function AdminLogin() {
         <h1 className="text-3xl font-display mb-6 text-center">Admin Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-accent/20 text-accent p-3 rounded">{error}</div>
+            <div className="bg-accent/20 text-accent p-3 rounded">
+              {error}
+              {error.includes('netlify dev') && (
+                <div className="mt-2 text-sm">
+                  <p>Ejecuta en otra terminal:</p>
+                  <code className="bg-primary/20 p-1 rounded">netlify dev</code>
+                </div>
+              )}
+            </div>
           )}
           <div>
             <label className="label">Email</label>

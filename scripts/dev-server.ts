@@ -631,7 +631,7 @@ app.put('/api/admin/sucursales', async (req, res) => {
   try {
     await supabase
       .from('juancito_site_config')
-      .upsert({ key: 'sucursales', value: req.body }, { onConflict: 'key })
+      .upsert({ key: 'sucursales', value: req.body }, { onConflict: 'key' })
 
     res.json({ success: true })
   } catch (error: any) {

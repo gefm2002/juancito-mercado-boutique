@@ -16,17 +16,11 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      // Intentar con /api (proxy de Vite a netlify dev)
-      let res
-      try {
-        res = await fetch('/api/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-      } catch (fetchError) {
-        throw new Error('No se puede conectar a las funciones. Ejecuta: netlify dev (en otra terminal)')
-      }
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
       if (!res.ok) {
         const errorText = await res.text()
@@ -34,27 +28,12 @@ export default function AdminLogin() {
         try {
           errorData = JSON.parse(errorText)
         } catch {
-          throw new Error(`Error del servidor: ${errorText.substring(0, 100)}`)
+          throw new Error('No se puede conectar al servidor. Ejecuta: npm run dev:server (en otra terminal)')
         }
         throw new Error(errorData.error || `Error ${res.status}`)
       }
 
-      const text = await res.text()
-      if (!text) {
-        throw new Error('Respuesta vacía del servidor. Verifica que netlify dev esté corriendo.')
-      }
-
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch {
-        throw new Error(`Respuesta no es JSON válido. Verifica que netlify dev esté corriendo en puerto 8888.`)
-      }
-
-      if (!data.token) {
-        throw new Error('No se recibió token de autenticación')
-      }
-
+      const data = await res.json()
       login(data.token)
       navigate('/admin/dashboard')
     } catch (err: any) {

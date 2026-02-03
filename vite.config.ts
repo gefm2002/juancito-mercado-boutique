@@ -12,16 +12,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8888',
+        target: 'http://localhost:3001',
         changeOrigin: true,
-        rewrite: (path) => {
-          // Convertir /api/admin/login -> /.netlify/functions/admin/login
-          return path.replace(/^\/api/, '/.netlify/functions')
-        },
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, res) => {
             console.log('⚠️  Proxy error:', err.message)
-            console.log('💡 Ejecuta: netlify dev (en otra terminal)')
+            console.log('💡 Ejecuta: npm run dev:server (en otra terminal)')
           })
         },
       },

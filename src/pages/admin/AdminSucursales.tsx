@@ -3,8 +3,6 @@ import AdminLayout from './AdminLayout'
 import { useAdmin } from '../../contexts/AdminContext'
 import { Sucursal } from '../../types'
 
-function AdminSucursales() {
-
 export default function AdminSucursales() {
   const { token } = useAdmin()
   const [sucursales, setSucursales] = useState<Sucursal[]>([])

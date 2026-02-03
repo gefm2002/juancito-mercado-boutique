@@ -2,7 +2,11 @@ import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { useAdmin } from '../../contexts/AdminContext'
 import { useEffect } from 'react'
 
-export default function AdminLayout() {
+interface AdminLayoutProps {
+  children?: React.ReactNode
+}
+
+export default function AdminLayout({ children }: AdminLayoutProps) {
   const { isAuthenticated, logout } = useAdmin()
   const navigate = useNavigate()
 
@@ -55,7 +59,7 @@ export default function AdminLayout() {
           </nav>
         </aside>
         <main className="flex-1 p-8">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>

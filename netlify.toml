@@ -9,43 +9,8 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# Redirect SPA - Netlify procesa funciones antes de redirects automáticamente
-# Pero para estar seguros, usamos un redirect más específico
-[[redirects]]
-  from = "/admin/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/catalogo"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/producto/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/carrito"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/checkout"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/sucursales"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/faq"
-  to = "/index.html"
-  status = 200
-
+# Redirect SPA - Netlify procesa funciones automáticamente antes de redirects
+# Las rutas /.netlify/functions/* se manejan primero
 [[redirects]]
   from = "/*"
   to = "/index.html"

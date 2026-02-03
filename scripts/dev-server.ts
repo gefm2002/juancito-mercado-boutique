@@ -84,7 +84,7 @@ app.get('/api/admin-me', async (req, res) => {
 })
 
 // Products endpoint
-app.get('/api/admin/products', async (req, res) => {
+app.get('/api/admin-products', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -103,7 +103,7 @@ app.get('/api/admin/products', async (req, res) => {
   }
 })
 
-app.post('/api/admin/products', async (req, res) => {
+app.post('/api/admin-products', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -123,7 +123,7 @@ app.post('/api/admin/products', async (req, res) => {
   }
 })
 
-app.put('/api/admin/products', async (req, res) => {
+app.put('/api/admin-products', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -149,7 +149,7 @@ app.put('/api/admin/products', async (req, res) => {
   }
 })
 
-app.delete('/api/admin/products', async (req, res) => {
+app.delete('/api/admin-products', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -170,7 +170,7 @@ app.delete('/api/admin/products', async (req, res) => {
 })
 
 // Categories endpoint
-app.get('/api/admin/categories', async (req, res) => {
+app.get('/api/admin-categories', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -189,7 +189,7 @@ app.get('/api/admin/categories', async (req, res) => {
   }
 })
 
-app.post('/api/admin/categories', async (req, res) => {
+app.post('/api/admin-categories', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -209,7 +209,7 @@ app.post('/api/admin/categories', async (req, res) => {
   }
 })
 
-app.put('/api/admin/categories', async (req, res) => {
+app.put('/api/admin-categories', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -235,7 +235,7 @@ app.put('/api/admin/categories', async (req, res) => {
   }
 })
 
-app.delete('/api/admin/categories', async (req, res) => {
+app.delete('/api/admin-categories', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -256,7 +256,7 @@ app.delete('/api/admin/categories', async (req, res) => {
 })
 
 // Orders endpoint
-app.get('/api/admin/orders', async (req, res) => {
+app.get('/api/admin-orders', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -276,7 +276,7 @@ app.get('/api/admin/orders', async (req, res) => {
   }
 })
 
-app.put('/api/admin/orders', async (req, res) => {
+app.put('/api/admin-orders', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -512,7 +512,7 @@ app.post('/api/orders-create', async (req, res) => {
 })
 
 // Promos endpoint
-app.get('/api/admin/promos', async (req, res) => {
+app.get('/api/admin-promos', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -531,7 +531,7 @@ app.get('/api/admin/promos', async (req, res) => {
   }
 })
 
-app.post('/api/admin/promos', async (req, res) => {
+app.post('/api/admin-promos', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -551,7 +551,7 @@ app.post('/api/admin/promos', async (req, res) => {
   }
 })
 
-app.put('/api/admin/promos', async (req, res) => {
+app.put('/api/admin-promos', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -577,7 +577,7 @@ app.put('/api/admin/promos', async (req, res) => {
   }
 })
 
-app.delete('/api/admin/promos', async (req, res) => {
+app.delete('/api/admin-promos', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -598,7 +598,7 @@ app.delete('/api/admin/promos', async (req, res) => {
 })
 
 // Sucursales endpoint
-app.get('/api/admin/sucursales', async (req, res) => {
+app.get('/api/admin-sucursales', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -622,7 +622,7 @@ app.get('/api/admin/sucursales', async (req, res) => {
   }
 })
 
-app.put('/api/admin/sucursales', async (req, res) => {
+app.put('/api/admin-sucursales', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -640,7 +640,7 @@ app.put('/api/admin/sucursales', async (req, res) => {
 })
 
 // Content endpoint
-app.get('/api/admin/content', async (req, res) => {
+app.get('/api/admin-content', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })
@@ -666,7 +666,7 @@ app.get('/api/admin/content', async (req, res) => {
   }
 })
 
-app.put('/api/admin/content', async (req, res) => {
+app.put('/api/admin-content', async (req, res) => {
   const decoded = verifyToken(req.headers.authorization)
   if (!decoded) {
     return res.status(401).json({ error: 'No autorizado' })

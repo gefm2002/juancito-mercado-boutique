@@ -1,5 +1,6 @@
 # Netlify redirects file
-# Las funciones se procesan automáticamente antes de estos redirects
+# IMPORTANTE: Las funciones se procesan ANTES de estos redirects
+# No capturar rutas de funciones
 
 /admin/*    /index.html   200
 /catalogo   /index.html   200

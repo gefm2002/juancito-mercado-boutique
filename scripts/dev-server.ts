@@ -239,8 +239,14 @@ app.post('/api/orders/create', async (req, res) => {
   }
 })
 
-// Proxy para otras funciones (redirigir a netlify dev si está disponible)
-app.all('/api/*', async (req, res) => {
+// Proxy para otras funciones admin (redirigir a netlify dev si está disponible)
+// IMPORTANTE: Este debe ir al final para no capturar las rutas específicas arriba
+app.all('/api/admin/*', async (req, res) => {
+  // Si ya manejamos login y me, hacer proxy para el resto
+  if (req.path === '/api/admin/login' || req.path === '/api/admin/me') {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
   try {
     const path = req.path.replace('/api', '/.netlify/functions')
     const proxyRes = await fetch(`http://localhost:8888${path}`, {

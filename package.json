@@ -10,7 +10,8 @@
     "seed": "tsx supabase/seed/seed.ts",
     "seed:images": "tsx scripts/download-stock-images.ts",
     "seed:full": "npm run seed:images && npm run seed",
-    "create-admin": "tsx scripts/create-admin.ts"
+    "create-admin": "tsx scripts/create-admin.ts",
+    "setup:full": "tsx scripts/setup-full.ts"
   },
   "dependencies": {
     "@netlify/functions": "^2.4.0",

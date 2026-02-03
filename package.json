@@ -8,6 +8,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "seed": "tsx supabase/seed/seed.ts",
+    "seed:images": "tsx scripts/download-stock-images.ts",
+    "seed:full": "npm run seed:images && npm run seed",
     "create-admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {

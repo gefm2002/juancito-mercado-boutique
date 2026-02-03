@@ -1,0 +1,45 @@
+{
+  "empanadas": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/empanadas/empanadas-1770156565996-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/empanadas/empanadas-1770156567970-1.webp"
+  ],
+  "sandwiches-tradicionales": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/sandwiches-tradicionales/sandwiches-tradicionales-1770156569189-1.webp"
+  ],
+  "sandwiches-gourmet": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/sandwiches-gourmet/sandwiches-gourmet-1770156569745-0.webp"
+  ],
+  "fiambres": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/fiambres/fiambres-1770156570428-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/fiambres/fiambres-1770156571426-1.webp"
+  ],
+  "quesos": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/quesos/quesos-1770156572147-0.webp"
+  ],
+  "carnes-envasadas": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/carnes-envasadas/carnes-envasadas-1770156573122-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/carnes-envasadas/carnes-envasadas-1770156573611-1.webp"
+  ],
+  "tablas-y-picadas": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/tablas-y-picadas/tablas-y-picadas-1770156574058-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/tablas-y-picadas/tablas-y-picadas-1770156574658-1.webp"
+  ],
+  "menu-del-dia": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/menu-del-dia/menu-del-dia-1770156575230-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/menu-del-dia/menu-del-dia-1770156575757-1.webp"
+  ],
+  "almacen-gourmet": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/almacen-gourmet/almacen-gourmet-1770156576401-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/almacen-gourmet/almacen-gourmet-1770156577112-1.webp"
+  ],
+  "vinos-y-bebidas": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/vinos-y-bebidas/vinos-y-bebidas-1770156577515-0.webp"
+  ],
+  "panaderia-y-pasteleria": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/panaderia-y-pasteleria/panaderia-y-pasteleria-1770156578344-0.webp",
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/panaderia-y-pasteleria/panaderia-y-pasteleria-1770156578842-1.webp"
+  ],
+  "hero": [
+    "https://oseeysmiwfdhpizzeota.supabase.co/storage/v1/object/public/juancito_product_images/hero/hero-1770156580570-0.webp"
+  ]
+}

@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import * as dotenv from 'dotenv'
-import { readFileSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
+import bcrypt from 'bcryptjs'
 
 dotenv.config({ path: '.env.local' })
 
@@ -14,6 +15,26 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+// Cargar imágenes si existen
+let imagesMap: Record<string, string[]> = {}
+const imagesPath = join(process.cwd(), 'supabase/seed/images.json')
+if (existsSync(imagesPath)) {
+  try {
+    imagesMap = JSON.parse(readFileSync(imagesPath, 'utf-8'))
+  } catch (e) {
+    console.log('⚠️  No se pudieron cargar imágenes, usando URLs por defecto')
+  }
+}
+
+function getImageForCategory(categorySlug: string, index: number = 0): string {
+  // Buscar en el mapa de imágenes por slug exacto
+  const images = imagesMap[categorySlug] || []
+  if (images.length > index) {
+    return images[index]
+  }
+  return ''
+}
 
 async function seed() {
   console.log('🌱 Starting seed...')
@@ -36,9 +57,10 @@ async function seed() {
   console.log('📦 Creating categories...')
   const categoryMap: Record<string, string> = {}
   for (const cat of categories) {
+    const imageUrl = getImageForCategory(cat.slug)
     const { data, error } = await supabase
       .from('juancito_categories')
-      .upsert(cat, { onConflict: 'slug' })
+      .upsert({ ...cat, image_url: imageUrl || null }, { onConflict: 'slug' })
       .select()
       .single()
 
@@ -169,12 +191,25 @@ async function seed() {
 
   console.log('📦 Creating products...')
   for (const product of products) {
+    // Obtener imágenes según la categoría
+    let productImages: string[] = product.images || []
+    if (productImages.length === 0 && product.category_id) {
+      // Buscar el slug de la categoría
+      const category = categories.find(c => categoryMap[c.slug] === product.category_id)
+      if (category) {
+        const img1 = getImageForCategory(category.slug, 0)
+        const img2 = getImageForCategory(category.slug, 1)
+        if (img1) productImages.push(img1)
+        if (img2) productImages.push(img2)
+      }
+    }
+
     const { error } = await supabase
       .from('juancito_products')
       .upsert(
         {
           ...product,
-          images: product.images || [],
+          images: productImages,
           combo_items: product.product_type === 'combo' ? [] : null,
         },
         { onConflict: 'slug' }
@@ -246,6 +281,29 @@ async function seed() {
 
   for (const promo of promos) {
     await supabase.from('juancito_promos').upsert(promo, { onConflict: 'id' })
+  }
+
+  // Crear admin por defecto
+  console.log('👤 Creating default admin...')
+  const adminEmail = 'admin@juancito.com'
+  const adminPassword = 'admin123' // Cambiar en producción!
+  
+  const passwordHash = await bcrypt.hash(adminPassword, 10)
+  
+  const { error: adminError } = await supabase
+    .from('juancito_admins')
+    .upsert({
+      email: adminEmail,
+      password_hash: passwordHash,
+      role: 'admin',
+      is_active: true,
+    }, { onConflict: 'email' })
+
+  if (adminError) {
+    console.error('Error creating admin:', adminError)
+  } else {
+    console.log(`✓ Created admin: ${adminEmail} / ${adminPassword}`)
+    console.log('⚠️  IMPORTANTE: Cambia la contraseña del admin en producción!')
   }
 
   console.log('✅ Seed completed!')

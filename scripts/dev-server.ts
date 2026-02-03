@@ -239,29 +239,8 @@ app.post('/api/orders/create', async (req, res) => {
   }
 })
 
-// Proxy para otras funciones admin (redirigir a netlify dev si está disponible)
-// IMPORTANTE: Este debe ir al final para no capturar las rutas específicas arriba
-app.all('/api/admin/:path(*)', async (req, res) => {
-  const path = req.params.path
-  // Si ya manejamos login y me, hacer proxy para el resto
-  if (path === 'login' || path === 'me') {
-    return res.status(404).json({ error: 'Not found' })
-  }
-
-  try {
-    const functionPath = `/.netlify/functions/admin/${path}`
-    const proxyRes = await fetch(`http://localhost:8888${functionPath}`, {
-      method: req.method,
-      headers: req.headers as any,
-      body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
-    })
-
-    const data = await proxyRes.text()
-    res.status(proxyRes.status).send(data)
-  } catch {
-    res.status(503).json({ error: 'Netlify Functions no disponibles. Ejecuta: netlify dev' })
-  }
-})
+// Nota: Otras funciones admin deben manejarse individualmente o usar netlify dev
+// Por ahora solo manejamos login y me localmente
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor de desarrollo en http://localhost:${PORT}`)

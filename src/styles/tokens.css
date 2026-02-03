@@ -1,0 +1,31 @@
+:root {
+  /* Colores */
+  --color-primary: #0B0F14;
+  --color-primary-contrast: #FFFFFF;
+  --color-accent: #B63A2B;
+  --color-accent-contrast: #FFFFFF;
+  --color-wood: #C7A57A;
+  --color-bg: #0B0F14;
+  --color-fg: #FFFFFF;
+  --color-muted: #9AA0A6;
+  --color-card: #F4EFE6;
+  --color-border: #9AA0A6;
+
+  /* Tipografías */
+  --font-display: 'Lobster Two', 'Pacifico', cursive;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Radios */
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Sombras */
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}

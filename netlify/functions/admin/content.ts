@@ -1,0 +1,84 @@
+import { Handler } from '@netlify/functions'
+import { createClient } from '@supabase/supabase-js'
+import jwt from 'jsonwebtoken'
+
+const supabaseUrl = process.env.SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const jwtSecret = process.env.NETLIFY_JWT_SECRET || 'change-me-in-production'
+
+function verifyToken(token: string) {
+  try {
+    return jwt.verify(token, jwtSecret) as { id: string; email: string; role: string }
+  } catch {
+    return null
+  }
+}
+
+export const handler: Handler = async (event, context) => {
+  const authHeader = event.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'No autorizado' }) }
+  }
+
+  const token = authHeader.substring(7)
+  const decoded = verifyToken(token)
+
+  if (!decoded) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Token inválido' }) }
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  if (event.httpMethod === 'GET') {
+    try {
+      const { data, error } = await supabase
+        .from('juancito_site_config')
+        .select('*')
+
+      if (error) throw error
+
+      const config: Record<string, any> = {}
+      if (data) {
+        data.forEach((item) => {
+          config[item.key] = item.value
+        })
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      }
+    } catch (error: any) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+  }
+
+  if (event.httpMethod === 'PUT') {
+    try {
+      const body = JSON.parse(event.body || '{}')
+
+      for (const [key, value] of Object.entries(body)) {
+        await supabase
+          .from('juancito_site_config')
+          .upsert({ key, value }, { onConflict: 'key' })
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true }),
+      }
+    } catch (error: any) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: error.message }),
+      }
+    }
+  }
+
+  return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) }
+}

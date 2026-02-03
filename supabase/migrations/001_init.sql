@@ -1,0 +1,135 @@
+-- Crear sequence para order_number
+CREATE SEQUENCE IF NOT EXISTS juancito_order_number_seq START 1;
+
+-- Tabla de categorías
+CREATE TABLE IF NOT EXISTS juancito_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  image_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabla de productos
+CREATE TABLE IF NOT EXISTS juancito_products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  category_id UUID REFERENCES juancito_categories(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  product_type TEXT NOT NULL CHECK (product_type IN ('standard', 'weighted', 'apparel', 'combo', 'service')),
+  price INTEGER,
+  price_per_kg INTEGER,
+  min_weight_g INTEGER DEFAULT 100,
+  step_weight_g INTEGER DEFAULT 100,
+  out_of_stock BOOLEAN DEFAULT false,
+  is_featured BOOLEAN DEFAULT false,
+  images JSONB DEFAULT '[]'::jsonb,
+  combo_items JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabla de órdenes
+CREATE TABLE IF NOT EXISTS juancito_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_number BIGINT UNIQUE DEFAULT nextval('juancito_order_number_seq'),
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'confirmed', 'preparing', 'shipped', 'completed', 'canceled')),
+  customer JSONB NOT NULL,
+  fulfillment JSONB NOT NULL,
+  payment_method TEXT NOT NULL,
+  notes_customer TEXT,
+  notes_internal TEXT,
+  items JSONB NOT NULL,
+  totals JSONB NOT NULL,
+  whatsapp_message TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabla de admins
+CREATE TABLE IF NOT EXISTS juancito_admins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'admin',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabla de promos/banners
+CREATE TABLE IF NOT EXISTS juancito_promos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT,
+  link_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabla de configuración del sitio
+CREATE TABLE IF NOT EXISTS juancito_site_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key TEXT UNIQUE NOT NULL,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_products_category ON juancito_products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_slug ON juancito_products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_featured ON juancito_products(is_featured);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON juancito_orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_number ON juancito_orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON juancito_categories(slug);
+CREATE INDEX IF NOT EXISTS idx_categories_active ON juancito_categories(is_active);
+
+-- RLS Policies
+ALTER TABLE juancito_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE juancito_products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE juancito_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE juancito_admins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE juancito_promos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE juancito_site_config ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Lectura pública de categorías activas
+CREATE POLICY "Public read categories" ON juancito_categories
+  FOR SELECT USING (is_active = true);
+
+-- Policy: Lectura pública de productos activos
+CREATE POLICY "Public read products" ON juancito_products
+  FOR SELECT USING (out_of_stock = false OR true);
+
+-- Policy: Lectura pública de promos activas
+CREATE POLICY "Public read promos" ON juancito_promos
+  FOR SELECT USING (is_active = true);
+
+-- Policy: Lectura pública de configuración
+CREATE POLICY "Public read config" ON juancito_site_config
+  FOR SELECT USING (true);
+
+-- Policy: Las órdenes solo se crean vía service role (functions)
+-- No hay policy pública para INSERT en orders
+
+-- Policy: Admins solo accesibles vía service role
+-- No hay policy pública para admins
+
+-- Función para actualizar updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Triggers para updated_at
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON juancito_products
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON juancito_orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

@@ -443,10 +443,22 @@ supabase/migrations/
 ```typescript
 // scripts/create-storage-bucket.ts
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'fs'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
 
 const supabaseUrl = process.env.SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const bucketName = `${PREFIX}_product_images`
+
+function inferPrefixFromProject(): string {
+  const projectName = process.env.SUPABASE_PROJECT_NAME || 'project'
+  return projectName
+    .replace(/[^a-z0-9]/gi, '_')
+    .toLowerCase()
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '') + '_'
+}
 
 async function createStorageBucket() {
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
